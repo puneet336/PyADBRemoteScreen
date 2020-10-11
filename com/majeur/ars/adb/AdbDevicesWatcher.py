@@ -12,56 +12,64 @@ import time
 import CommandExec;
 import File;
 import re;
+import AdbDevice
+import Utils
 
 class AdbDevicesWatcher(threading.Thread):
     __madbHelper: AdbHelper;
     __mWatchThread: threading.Thread;
     __mPreviouslyConnectedDevices=""
-    
+    __event: threading.Event
     
     def __init__(self,adbHelper):
         self.__madbHelper=adbHelper
 #    def __init__(self):
         threading.Thread.__init__(self)
         self.__mWatchThread=self
-        self._dts=list()
         
     def startWatch(self):
  #       self.__mWatchThread=threading.Thread(target=run)
+        self.__event=threading.Event()
         self.__running=True
         self.__mWatchThread.start()
         
     def stopWatch(self):
         self.__running=False
+        self.__event.set()
         
-    def fin(self):
-        return self._dts
+    def getEvent(self):
+        return self.__event
+        
+
     def run(self):
         print(str(threading.currentThread().ident)+":device watching started")
         while self.__running == True:
             devices=list()
             commandBuilder=self.__madbHelper.getCommandBuilder();
             _stdout,_stderr,_returncode=CommandExec.CommandExec().execute(commandBuilder.buildDevicesCommand())
-            time.sleep(10)
             
             if _returncode == 0:
-                print(_stdout)
                 for _line in _stdout.decode('utf-8').splitlines():
                     if re.match("^List",_line):
-                        print("skip:",_line)
                         continue
                     if re.match("^ *$",_line):
-                        print("skip:",_line);
                         continue
                     if re.match("^\*",_line):
-                        print("skip:",_line);
                         continue
-                    print("device:",_line)
+#                    print("device:",_line)
                 
-#                devices.add(AdbDevice(line))
+                    devices.append(AdbDevice.AdbDevice(_line))
+                    devices.sort()
+                if Utils.Utils.equalsOrder(devices,self.__mPreviouslyConnectedDevices) == False :
+                    self.__mPreviouslyConnectedDevices=devices
+                    
             else:
                 print(_stderr)
                 break
+            print("devices - ",len(self.__mPreviouslyConnectedDevices))
+
+            Utils.Utils.sleep(self.__event,5)
+            
             #
         print(str(threading.currentThread().ident)+":device watching stopped")
             
