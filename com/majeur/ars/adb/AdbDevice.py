@@ -6,7 +6,7 @@ Created on Wed Oct  7 00:13:50 2020
 @author: puneet
 """
 import re
-import Utils
+import adb.Utils as Utils
 
 class AdbDevice:
     serial: str;

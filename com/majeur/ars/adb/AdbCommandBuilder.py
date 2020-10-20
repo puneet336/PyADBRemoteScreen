@@ -6,7 +6,7 @@ This is a temporary script file.
 """
 
 import File
-import AdbHelper
+import adb.AdbHelper as AdbHelper
 
 class AdbCommandBuilder:
     __file: File;
@@ -17,20 +17,20 @@ class AdbCommandBuilder:
 
     
     def buildTapCommand(self,x,y):
-        command=buildInputCommand()
+        command=self.buildInputCommand()
         command.append("tap")
         command.append(str(x))
         command.append(str(y))
         return command;
     
     def buildKeyEventCommand(self,keyCode):
-        command=buildInputCommand
+        command=self.buildInputCommand()
         command.append("keyevent")
         command.append(str(keyCode))
         return command;
     
-    def buildSwipeCommand(x1,y1,x2,y2,dt):
-        command=buildInputCommand();
+    def buildSwipeCommand(self,x1,y1,x2,y2,dt):
+        command=self.buildInputCommand();
         command.append("swipe")
         command.append(str(x1))
         command.append(str(y1))
@@ -39,13 +39,13 @@ class AdbCommandBuilder:
         command.append(str(dt))
         return command;
    
-    def buildInputCommand():
-        command=buildShellCommand();
+    def buildInputCommand(self):
+        command=self.buildShellCommand();
         command.append("input")
         return command;
     
-    def buildShellCommand():
-        command=buildDeviceSpecificCommand();
+    def buildShellCommand(self):
+        command=self.buildDeviceSpecificCommand();
         command.add("shell")
         return command;
     
